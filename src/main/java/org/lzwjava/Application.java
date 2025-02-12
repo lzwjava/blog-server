@@ -1,4 +1,4 @@
-package org.example;
+package org.lzwjava;
 
 import java.util.Arrays;
 
