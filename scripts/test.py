@@ -1,4 +1,6 @@
 import requests
 
-response = requests.get("http://localhost:8080/bandwidth")
+params = {'x': 'hi'}
+response = requests.get("http://localhost:8080/bandwidth", params=params)
+print(response.headers)
 print(response.text)
