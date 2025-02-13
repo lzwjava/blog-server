@@ -8,7 +8,7 @@ python3 bandwidth_api.py
 
 sudo systemctl start nginx
 
-sudo certbot --nginx -d lzwjava.xyz 
+sudo certbot certonly --standalone -n -d lzwjava.xyz --email lzwjava@gmail.com --agree-tos 
 
 sudo nginx -t
 
