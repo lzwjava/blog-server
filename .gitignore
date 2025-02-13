@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+server/ip.sh
+server/domain.sh
