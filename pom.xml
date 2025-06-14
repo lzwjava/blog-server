@@ -59,6 +59,66 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.18.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <configLocation>${project.basedir}/checks.xml</configLocation>
+                    <failOnViolation>true</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <java>
+                        <!-- Use Checkstyle to format based on checks.xml -->
+                        <checkstyle>
+                            <version>10.18.0</version>
+                            <file>${project.basedir}/checks.xml</file>
+                        </checkstyle>
+                        <!-- Eclipse formatter for additional formatting -->
+                        <eclipse>
+                            <version>4.29.0</version>
+                            <properties>
+                                <org.eclipse.jdt.core.formatter.tabulation.char>space</org.eclipse.jdt.core.formatter.tabulation.char>
+                                <org.eclipse.jdt.core.formatter.tabulation.size>4</org.eclipse.jdt.core.formatter.tabulation.size>
+                                <org.eclipse.jdt.core.formatter.indentation.size>4</org.eclipse.jdt.core.formatter.indentation.size>
+                            </properties>
+                        </eclipse>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotless-apply</id>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.2</version>
@@ -75,32 +135,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M8</version>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.1</version> <!-- Latest stable version as of now -->
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>10.18.0</version> <!-- Or the latest version -->
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <configLocation>${project.basedir}/checks.xml</configLocation>
-                    <failOnViolation>true</failOnViolation>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>checkstyle-check</id> <!-- Optional: give the execution a clear ID -->
-                        <phase>compile</phase> <!-- Bind to the compile phase -->
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
         </plugins>
     </build>
-
 </project>
