@@ -98,7 +98,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>org.lzwjava.DeployHelper</mainClass>
+                            <mainClass>org.lzwjava.Deployer</mainClass>
                             <arguments>
                                 <argument>${project.build.directory}/${project.build.finalName}.jar</argument>
                                 <argument>/root/app.jar</argument> 
