@@ -30,7 +30,7 @@ jobs:
 
     # Build with Maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B --no-transfer-progress package --file pom.xml
 
     # Optionally provision a Hetzner Cloud server (uncomment if needed)
     # - name: Provision Hetzner Cloud Server
