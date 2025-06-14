@@ -64,8 +64,8 @@
                 <version>2.44.5</version>
                 <configuration>
                     <java>
-                        <googleJavaFormat/>
-                    </java>
+                        <eclipse/>
+                      </java>
                 </configuration>
                 <executions>
                     <execution>
