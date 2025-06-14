@@ -91,6 +91,16 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>deploy-server</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.lzwjava.DeployHelper</mainClass>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

@@ -29,10 +29,6 @@ jobs:
     - name: Install vnstat
       run: sudo apt-get update && sudo apt-get install -y vnstat
 
-    # Build with Maven
-    - name: Build with Maven
-      run: mvn -B --no-transfer-progress package --file pom.xml
-
     # Optionally provision a Hetzner Cloud server (uncomment if needed)
     # - name: Provision Hetzner Cloud Server
     #   uses: TimDaub/hetzner-cloud-deploy-server-action@v2
@@ -59,10 +55,7 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
-    # Deploy JAR to Hetzner server
-    - name: Deploy to Hetzner Server
-      run: |
-        scp -v target/*.jar root@${{ secrets.SERVER_IP }}:/root/app.jar
-        ssh -v root@${{ secrets.SERVER_IP }} "pkill -f 'java -jar'"
-        ssh -v root@${{ secrets.SERVER_IP }} "nohup java -jar /root/app.jar"        
+    # Build with Maven
+    - name: Build with Maven
+      run: mvn -B --no-transfer-progress integration-test --file pom.xml
 
