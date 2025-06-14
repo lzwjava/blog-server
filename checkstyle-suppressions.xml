@@ -1,0 +1,6 @@
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD Suppression DTD//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <suppress checks="MissingJavadocMethod" files="..java"/>
+</suppressions>

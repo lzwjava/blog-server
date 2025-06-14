@@ -1,7 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.compile.nullAnalysis.mode": "disabled",
-    "checkstyle.configFile": "${workspaceFolder}/checks.xml",
     "java.checkstyle.configuration": "${workspaceFolder}/checks.xml",
     "java.checkstyle.version": "10.25.0"
 }
