@@ -8,8 +8,16 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JavadocRemover {
+
+    private static final Logger logger = LoggerFactory.getLogger(JavadocRemover.class);
+
+    private JavadocRemover() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void main(String[] args) {
         String directoryPath = ".";
@@ -29,7 +37,7 @@ public class JavadocRemover {
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error walking the file tree", e);
         }
     }
 
@@ -40,7 +48,7 @@ public class JavadocRemover {
             content = pattern.matcher(content).replaceAll("");
             Files.write(filePath, content.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error removing Javadoc from file: {}", filePath, e);
         }
     }
 }
