@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public final class HelloController {
+public class HelloController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/bandwidth")
@@ -24,7 +24,7 @@ public final class HelloController {
                 // on macOS
             } else {
                 // Linux: Use vnstat
-                process = new ProcessBuilder("vnstat", "-i", "eth0", "-5", "--json").start();
+                process = new ProcessBuilder("vnstat", "-i", "enp4s0", "-5", "--json").start();
             }
 
             StringBuilder output = new StringBuilder();
