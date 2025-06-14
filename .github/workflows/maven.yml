@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI with Maven and Deploy to Hetzner
 
 on:
   push:
@@ -8,17 +8,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # Checkout the repository
     - uses: actions/checkout@v4
+
+    # Set up JDK 21
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+
+    # Build with Maven
     - name: Build with Maven
-      run: mvn -X package
+      run: mvn -B package --file pom.xml
+
+    # Optionally provision a Hetzner Cloud server (uncomment if needed)
+    # - name: Provision Hetzner Cloud Server
+    #   uses: TimDaub/hetzner-cloud-deploy-server-action@v2
+    #   with:
+    #     server-name: "gh-actions-server"
+    #     server-image: "ubuntu-20.04"
+    #     server-type: "cx11"
+    #     server-location: "nbg1"
+    #     ssh-key-name: "my-ssh-key" # Name of SSH key in Hetzner Cloud Console
+    #     hcloud-token: ${{ secrets.HCLOUD_TOKEN }}
+    #     delete-server: false # Keep server after workflow
+    #   env:
+    #     SERVER_IP: ${{ env.SERVER_IPV4 }} # Output from action if provisioning
+
+    # Set up SSH agent
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.4.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Add server to known hosts
+    - name: Add server to known hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    # Deploy JAR to Hetzner server
+    - name: Deploy to Hetzner Server
+      run: |
+        scp target/*.jar root@${{ secrets.SERVER_IP }}:/root/app.jar
+        ssh root@${{ secrets.SERVER_IP }} "pkill -f 'java -jar' || true; nohup java -jar /root/app.jar &"
+
+    # Optional: Verify deployment
+    - name: Verify deployment
+      run: |
+        ssh root@${{ secrets.SERVER_IP }} "ps aux | grep '[j]ava -jar'"
