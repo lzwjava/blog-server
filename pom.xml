@@ -76,12 +76,15 @@
                 <executions>
                     <execution>
                         <id>remove-javadoc</id>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
                         <configuration>
                             <mainClass>org.lzwjava.JavadocRemover</mainClass>
+                            <arguments>
+                                <argument>src/main</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
@@ -100,7 +103,7 @@
                         <goals>
                             <goal>apply</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>

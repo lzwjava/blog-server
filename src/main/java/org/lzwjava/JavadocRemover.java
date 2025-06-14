@@ -20,8 +20,12 @@ public class JavadocRemover {
     }
 
     public static void main(String[] args) {
-        String directoryPath = ".";
-        removeJavadocFromDirectory(directoryPath);
+        if (args.length > 0) {
+            String directoryPath = args[0];
+            removeJavadocFromDirectory(directoryPath);
+        } else {
+            logger.error("Please provide a directory path as a command-line argument.");
+        }
     }
 
     public static void removeJavadocFromDirectory(String directoryPath) {
