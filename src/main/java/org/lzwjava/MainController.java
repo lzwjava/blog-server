@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -13,25 +14,22 @@ public class MainController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/bandwidth")
-    public ResponseEntity<String> getBandwidth() {
+    public ResponseEntity<String> getBandwidth(@RequestParam(value = "i", required = false) String networkInterface) {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
+
             Process process;
             if (osName.contains("mac")) {
-                // macOS: Use a different method, e.g., ifconfig or iperf
-                // Example using ifconfig (may require parsing to extract relevant data)
-                process = new ProcessBuilder("ifconfig", "en0").start(); // en0 is usually the primary network interface
-                // on macOS
+                process = new ProcessBuilder("ifconfig", "en0").start();
             } else {
-                // Linux: Use vnstat
-                process = new ProcessBuilder("vnstat", "-i", "enp4s0", "-5", "--json").start();
+                process = new ProcessBuilder("vnstat", "-i", networkInterface, "-5", "--json").start();
             }
 
             StringBuilder output = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n"); // Append newline to preserve formatting
+                    output.append(line).append(System.lineSeparator());
                 }
             }
 
@@ -40,11 +38,13 @@ public class MainController {
                 return ResponseEntity.status(500).body("Command failed with exit code: " + exitCode);
             }
 
-            // Return the captured data as a JSON response
             return ResponseEntity.ok(output.toString());
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             return ResponseEntity.status(500).body("Error executing command: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ResponseEntity.status(500).body("Command execution interrupted: " + e.getMessage());
         }
     }
 }
