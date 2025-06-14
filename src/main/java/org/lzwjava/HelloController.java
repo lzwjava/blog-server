@@ -8,9 +8,19 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for handling network-related endpoints.
+ * This class is not designed for extension.
+ */
 @RestController
-public class HelloController {
+public final class HelloController {
 
+    /**
+     * Retrieves the current bandwidth information from the system.
+     * Uses different commands based on the operating system (Mac or Linux).
+     *
+     * @return ResponseEntity containing bandwidth information as JSON string
+     */
     @CrossOrigin(origins = "*")
     @GetMapping("/bandwidth")
     public ResponseEntity<String> getBandwidth() {
