@@ -78,12 +78,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.3.1</version> <!-- Latest stable version as of now -->
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.18.0</version> <!-- Or the latest version -->
+                    </dependency>
+                </dependencies>
                 <configuration>
-                    <configLocation>google_checks.xml</configLocation>
+                    <configLocation>${project.basedir}/checks.xml</configLocation>
+                    <failOnViolation>true</failOnViolation>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>checkstyle-check</id> <!-- Optional: give the execution a clear ID -->
+                        <phase>compile</phase> <!-- Bind to the compile phase -->
                         <goals>
                             <goal>check</goal>
                         </goals>
