@@ -64,3 +64,4 @@ jobs:
       run: |
         scp -v target/*.jar root@${{ secrets.SERVER_IP }}:/root/app.jar
         ssh -v root@${{ secrets.SERVER_IP }} "pkill -f 'java -jar' || true; nohup java -jar /root/app.jar &"
+        exit 0
