@@ -24,6 +24,10 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    # Install vnstat
+    - name: Install vnstat
+      run: sudo apt-get update && sudo apt-get install -y vnstat
+
     # Build with Maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
