@@ -64,8 +64,8 @@
                 <version>2.44.5</version>
                 <configuration>
                     <java>
-                        <eclipse/>
-                      </java>
+                        <palantirJavaFormat />
+                    </java>
                 </configuration>
                 <executions>
                     <execution>
@@ -75,7 +75,7 @@
                         <phase>validate</phase>
                     </execution>
                 </executions>
-            </plugin>      
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -100,7 +100,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>           
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
