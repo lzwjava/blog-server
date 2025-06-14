@@ -17,12 +17,6 @@ public final class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    /**
-     * Creates a CommandLineRunner that logs all Spring beans.
-     * This method is not designed for extension.
-     * @param ctx The Spring application context
-     * @return A CommandLineRunner that prints bean information
-     */
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
