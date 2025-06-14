@@ -26,6 +26,9 @@ public class MainController {
             }
 
             StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+
+            // Capture standard output
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -33,9 +36,19 @@ public class MainController {
                 }
             }
 
+            // Capture error output
+            try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String errorLine;
+                while ((errorLine = errorReader.readLine()) != null) {
+                    errorOutput.append(errorLine).append(System.lineSeparator());
+                }
+            }
+
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                return ResponseEntity.status(500).body("Command failed with exit code: " + exitCode);
+                // Prioritize stdout for JSON errors, fallback to stderr
+                String errorResponse = output.length() > 0 ? output.toString() : errorOutput.toString();
+                return ResponseEntity.status(500).body(errorResponse);
             }
 
             return ResponseEntity.ok(output.toString());
