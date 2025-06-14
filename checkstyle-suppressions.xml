@@ -2,5 +2,5 @@
 <suppressions>
     <suppress checks="MissingJavadocMethod" files=".*\.java" />
     <suppress checks="HideUtilityClassConstructor" files="org/lzwjava/.*\.java"/>
-    <suppress checks="DesignForExtension" files="org/lzwjava/HelloController.java"/>
+    <suppress checks="DesignForExtension" files="org/lzwjava/MainController.java"/>
 </suppressions>
