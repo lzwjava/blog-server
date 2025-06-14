@@ -1,13 +1,13 @@
 package org.lzwjava;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 @RestController
 public class HelloController {
@@ -21,7 +21,8 @@ public class HelloController {
             if (osName.contains("mac")) {
                 // macOS: Use a different method, e.g., ifconfig or iperf
                 // Example using ifconfig (may require parsing to extract relevant data)
-                process = new ProcessBuilder("ifconfig", "en0").start(); // en0 is usually the primary network interface on macOS
+                process = new ProcessBuilder("ifconfig", "en0").start(); // en0 is usually the primary network interface
+                                                                         // on macOS
             } else {
                 // Linux: Use vnstat
                 process = new ProcessBuilder("vnstat", "-i", "eth0", "-5", "--json").start();

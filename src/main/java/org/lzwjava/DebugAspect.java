@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class DebugAspect {
     @After("execution(* org.lzwjava..*(..))")
     public void logAfter(JoinPoint joinPoint) {
-    System.out.println("Method executed: " + joinPoint.getSignature());
+        System.out.println("Method executed: " + joinPoint.getSignature());
     }
 }

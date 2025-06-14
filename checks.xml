@@ -61,6 +61,12 @@
 
   <module name="TreeWalker">
     <module name="OuterTypeFilename" />
+    <module name="Indentation">
+      <property name="basicOffset" value="2" />
+      <property name="braceAdjustment" value="0" />
+      <property name="caseIndent" value="2" />
+      <property name="throwsIndent" value="2" />
+    </module>
     <module name="IllegalTokenText">
       <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL" />
       <property name="format"
@@ -385,6 +391,7 @@
       <property name="accessModifiers" value="public" />
       <property name="allowMissingParamTags" value="true" />
       <property name="allowMissingReturnTag" value="true" />
+      <property name="allowMissingJavadoc" value="true" />
       <property name="allowedAnnotations" value="Override, Test" />
       <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF" />
     </module>
