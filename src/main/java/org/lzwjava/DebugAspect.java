@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public final class DebugAspect {
     private static final Logger log = LoggerFactory.getLogger(DebugAspect.class);
 
-    @After("execution(* org.lzwjava..*(..))")
+    @After("execution(* org.lzwjava.HelloController.*(..))")
     public void logAfter(JoinPoint joinPoint) {
         log.info("Method executed: {}", joinPoint.getSignature());
     }
