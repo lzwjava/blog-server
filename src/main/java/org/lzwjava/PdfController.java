@@ -32,10 +32,11 @@ public class PdfController {
             return ResponseEntity.badRequest().body("No file uploaded".getBytes());
         }
 
-        // Create temporary files
+        // Create temporary files using absolute paths
+        String tempDir = System.getProperty("java.io.tmpdir");
         String originalFileName = markdownFile.getOriginalFilename();
-        String tempMarkdownPath = "temp_" + UUID.randomUUID() + ".md";
-        String tempPdfPath = "temp_" + UUID.randomUUID() + ".pdf";
+        String tempMarkdownPath = tempDir + File.separator + "temp_" + UUID.randomUUID() + ".md";
+        String tempPdfPath = tempDir + File.separator + "temp_" + UUID.randomUUID() + ".pdf";
 
         // Save uploaded Markdown file temporarily
         File tempMarkdownFile = new File(tempMarkdownPath);

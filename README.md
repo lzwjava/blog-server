@@ -11,7 +11,10 @@ To install the necessary dependencies, run the following command:
 ```bash
 sudo apt install vnstat
 sudo apt install pandoc 
-
+sudo apt install -y fonts-noto
+sudo apt install -y fonts-noto-cjk
+sudo apt install -y fonts-dejavu
+          
 mvn -X compile
 
 mvn checkstyle:check
