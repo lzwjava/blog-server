@@ -1,14 +1,13 @@
-# Use an official OpenJDK runtime as the base image
-FROM openjdk:17-jdk-slim
-
-# Set the working directory inside the container
+# ---- Build Stage ----
+FROM maven:3.9.7-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn -B --no-transfer-progress package
 
-# Copy the Spring Boot JAR file into the container
-COPY target/blog-server-1.0.jar app.jar
-
-# Expose the port your Spring Boot app runs on (default is 8080)
+# ---- Run Stage ----
+FROM eclipse-temurin:21-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/blog-server-1.0.jar app.jar
 EXPOSE 8080
-
-# Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
