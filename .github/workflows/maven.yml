@@ -11,9 +11,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: prod
-    env:
-      SERVER_IP: ${{ secrets.SERVER_IP }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
     # Checkout the repository
@@ -61,6 +58,4 @@ jobs:
     # Build with Maven
     - name: Build with Maven
       run: mvn -B --no-transfer-progress integration-test --file pom.xml
-
-
 

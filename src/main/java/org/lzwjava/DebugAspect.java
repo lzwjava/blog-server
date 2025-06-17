@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 public final class DebugAspect {
     private static final Logger log = LoggerFactory.getLogger(DebugAspect.class);
 
-    @Before("execution(* org.lzwjava.MainController.*(..))")
+    @Before("execution(* org.lzwjava...*(..))")
     public void logBefore(JoinPoint joinPoint) {
         log.info("Method executed: {}", joinPoint.getSignature());
     }
 
-    @AfterReturning(pointcut = "execution(* org.lzwjava.MainController.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* org.lzwjava...*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
         log.info("Method {} returned: {}", joinPoint.getSignature(), result);
     }

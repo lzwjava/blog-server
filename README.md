@@ -10,6 +10,7 @@ To install the necessary dependencies, run the following command:
 
 ```bash
 sudo apt install vnstat
+sudo apt install pandoc 
 
 mvn -X compile
 

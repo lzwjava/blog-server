@@ -1,7 +1,9 @@
 package org.lzwjava;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
@@ -85,11 +87,28 @@ public class PdfController {
         Process process = processBuilder.start();
         int exitCode = process.waitFor();
 
+        // Capture output and error output
+        StringBuilder output = new StringBuilder();
+        StringBuilder errorOutput = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+        }
+        try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            String errorLine;
+            while ((errorLine = errorReader.readLine()) != null) {
+                errorOutput.append(errorLine).append(System.lineSeparator());
+            }
+        }
+
         // Clean up Markdown temp file
         deleteTempFile(tempMarkdownFile);
 
         if (exitCode != 0) {
-            String errorMessage = "Pandoc failed for " + originalFileName;
+            String errorMessage = "Pandoc failed for " + originalFileName + "\nOutput:\n" + output + "\nError Output:\n"
+                    + errorOutput;
             deleteTempFile(new File(tempPdfPath));
             return ResponseEntity.status(500).body(errorMessage.getBytes());
         }
