@@ -14,6 +14,7 @@ sudo apt install pandoc
 sudo apt install -y fonts-noto
 sudo apt install -y fonts-noto-cjk
 sudo apt install -y fonts-dejavu
+sudo apt install texlive-lang-chinese
           
 mvn -X compile
 

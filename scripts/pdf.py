@@ -13,11 +13,11 @@ with open(markdown_file_path, 'rb') as f:
 
 # Print the response status and content
 print('Status code:', response.status_code)
-print('Text:', response.text)
-# if response.headers.get('Content-Type') == 'application/pdf':
-#     with open('output.pdf', 'wb') as out_pdf:
-#         out_pdf.write(response.content)
-#     print('PDF saved as output.pdf')
-# else:
-#     print('Response:', response.text)
-#
+
+if response.headers.get('Content-Type') == 'application/pdf':
+    with open('target/output.pdf', 'wb') as out_pdf:
+        out_pdf.write(response.content)
+    print('PDF saved as output.pdf')
+else:
+    print('Response:', response.text)
+
