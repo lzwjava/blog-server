@@ -2,7 +2,7 @@
 
 [![Java CI with Maven](https://github.com/lzwjava/blog-server/actions/workflows/maven.yml/badge.svg)](https://github.com/lzwjava/blog-server/actions/workflows/maven.yml)
 
-A blog server built with Node.js and Express, designed to manage blog posts, comments, and user accounts.
+A blog server.
 
 ## Installation
 

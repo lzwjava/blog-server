@@ -29,6 +29,20 @@ jobs:
     - name: Install vnstat
       run: sudo apt-get update && sudo apt-get install -y vnstat
 
+    # Optionally provision a Hetzner Cloud server (uncomment if needed)
+    # - name: Provision Hetzner Cloud Server
+    #   uses: TimDaub/hetzner-cloud-deploy-server-action@v2
+    #   with:
+    #     server-name: "gh-actions-server"
+    #     server-image: "ubuntu-20.04"
+    #     server-type: "cx11"
+    #     server-location: "nbg1"
+    #     ssh-key-name: "my-ssh-key" # Name of SSH key in Hetzner Cloud Console
+    #     hcloud-token: ${{ secrets.HCLOUD_TOKEN }}
+    #     delete-server: false # Keep server after workflow
+    #   env:
+    #     SERVER_IP: ${{ env.SERVER_IPV4 }} # Output from action if provisioning
+
     # Set up SSH agent
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.4.1
