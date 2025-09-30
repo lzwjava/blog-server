@@ -1,7 +1,5 @@
 package org.lzwjava;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteController {
 
     private static Logger logger = LoggerFactory.getLogger(NoteController.class);
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${blog.source.path}")
     private String blogSourcePath;
@@ -60,7 +56,7 @@ public class NoteController {
             }
 
             List<String> modelKeys =
-                    objectMapper.readValue(scriptOutput.toString().trim(), new TypeReference<List<String>>() {});
+                    Arrays.asList(scriptOutput.toString().trim().split(","));
             return ResponseEntity.ok(modelKeys);
         } catch (IOException e) {
             logger.error("IO error getting models", e);
