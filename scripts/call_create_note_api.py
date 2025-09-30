@@ -35,7 +35,7 @@ def call_create_note_api(content: str, model: Optional[str] = None) -> dict:
             'https': None,
         }
 
-        response = requests.post(url, json=payload, proxies=proxies)
+        response = requests.post(url, json=payload, proxies=proxies, timeout=15)
         response.raise_for_status()  # Raise exception for bad status codes
 
         result = {
