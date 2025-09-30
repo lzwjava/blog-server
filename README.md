@@ -60,7 +60,7 @@ Request body:
 ```json
 {
   "content": "Your note content here",
-  "model": "gpt-4o"  // optional, defaults to gpt-4o
+  "model": "mistral-medium"  // optional, defaults to mistral-medium
 }
 ```
 

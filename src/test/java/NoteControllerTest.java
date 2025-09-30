@@ -33,7 +33,7 @@ public class NoteControllerTest {
     void testCreateNoteWithValidRequest() {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("content", "Test note content");
-        requestBody.put("model", "gpt-4o");
+        requestBody.put("model", "mistral-medium");
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
@@ -98,7 +98,11 @@ public class NoteControllerTest {
         ResponseEntity<String> response =
                 restTemplate.getForEntity("http://localhost:" + port + "/models", String.class);
 
-        // Python script execution fails (path may not exist in test environment)
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        // Models endpoint should return successfully with a list of available models
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody() != null && !response.getBody().isEmpty());
+        // Verify we get some expected models
+        assertTrue(
+                response.getBody().contains("claude-opus") || response.getBody().contains("gpt"));
     }
 }

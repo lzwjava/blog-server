@@ -14,7 +14,7 @@ def call_create_note_api(content: str, model: Optional[str] = None) -> dict:
 
     Args:
         content: The note content to create
-        model: Optional model parameter (defaults to "gpt-4o")
+        model: Optional model parameter (defaults to "mistral-medium")
 
     Returns:
         API response as dictionary
@@ -26,7 +26,7 @@ def call_create_note_api(content: str, model: Optional[str] = None) -> dict:
         payload["model"] = model
 
     try:
-        print(f"Calling API with model: {model or 'gpt-4o'}")
+        print(f"Calling API with model: {model or 'mistral-medium'}")
         print(f"Content length: {len(content)} characters")
 
         # Configure proxies to bypass localhost

@@ -1,6 +1,8 @@
 blog:
   source:
     path: /Users/lzwjava/projects/blog-source
+  default:
+    model: mistral-medium
 
 python:
   executable:

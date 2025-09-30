@@ -27,6 +27,9 @@ public class NoteController {
     @Value("${python.executable.path}")
     private String pythonExecutablePath;
 
+    @Value("${blog.default.model}")
+    private String defaultModel;
+
     @CrossOrigin(origins = "*")
     @GetMapping("/models")
     public ResponseEntity<List<String>> getModels() {
@@ -75,7 +78,7 @@ public class NoteController {
     @PostMapping("/create-note")
     public ResponseEntity<String> createNote(@RequestBody Map<String, String> request) {
         String noteContent = request.get("content");
-        String modelKey = request.getOrDefault("model", "gpt-4o");
+        String modelKey = request.getOrDefault("model", defaultModel);
 
         if (noteContent == null || noteContent.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Note content is required");
