@@ -18,8 +18,9 @@ public class NoteControllerTest {
 
     @BeforeEach
     void setUpTestEnvironment() {
-        // Set a non-existent path so Python script fails quickly in test environment (fallback)
-        System.setProperty("BLOG_SOURCE_PATH", "/test/nonexistent/path");
+        // Use the hardcoded script path which may not exist in test environment
+        // The controller will attempt to execute
+        // /Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py
     }
 
     @LocalServerPort
@@ -37,7 +38,7 @@ public class NoteControllerTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Clipboard operation succeeds, but Python script fails due to nonexistent path
+        // Python script execution fails (path hardcoded, may not exist in test environment)
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to create note"));
     }
@@ -87,7 +88,7 @@ public class NoteControllerTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Clipboard operation succeeds, but Python script fails due to nonexistent path
+        // Python script execution fails (path hardcoded, may not exist in test environment)
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to create note"));
     }

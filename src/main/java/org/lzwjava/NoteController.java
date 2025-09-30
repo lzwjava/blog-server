@@ -35,15 +35,7 @@ public class NoteController {
         }
 
         try {
-            // Step 1: Write note content to clipboard
-            ResponseEntity<String> clipboardResult = writeToClipboard(noteContent);
-            if (clipboardResult != null) {
-                return clipboardResult;
-            }
-
-            // Step 2: Execute create_note Python script
             return executeCreateNoteScript(modelKey);
-
         } catch (IOException e) {
             logger.error("IO error during note creation", e);
             return ResponseEntity.status(500).body("IO error during note creation: " + e.getMessage());
@@ -57,54 +49,13 @@ public class NoteController {
         }
     }
 
-    private ResponseEntity<String> writeToClipboard(String content) throws IOException, InterruptedException {
-        String osName = System.getProperty("os.name").toLowerCase();
-
-        if (osName.contains("mac")) {
-            return writeToMacClipboard(content);
-        } else if (osName.contains("linux")) {
-            return writeToLinuxClipboard(content);
-        } else {
-            return ResponseEntity.status(500).body("Unsupported OS for clipboard operations");
-        }
-    }
-
-    private ResponseEntity<String> writeToMacClipboard(String content) throws IOException, InterruptedException {
-        Process echoProcess = new ProcessBuilder("echo", "-n", content).start();
-        Process pbcopyProcess = new ProcessBuilder("pbcopy").start();
-        echoProcess.getInputStream().transferTo(pbcopyProcess.getOutputStream());
-        pbcopyProcess.waitFor();
-        logger.info("Wrote note content to clipboard using pbcopy");
-        return null; // Success
-    }
-
-    private ResponseEntity<String> writeToLinuxClipboard(String content) throws IOException, InterruptedException {
-        try {
-            Process echoProcess = new ProcessBuilder("echo", "-n", content).start();
-            Process xclipProcess = new ProcessBuilder("xclip", "-selection", "clipboard").start();
-            echoProcess.getInputStream().transferTo(xclipProcess.getOutputStream());
-            xclipProcess.waitFor();
-            logger.info("Wrote note content to clipboard using xclip");
-        } catch (Exception e) {
-            // Fallback to xsel
-            Process echoProcess = new ProcessBuilder("echo", "-n", content).start();
-            Process xselProcess = new ProcessBuilder("xsel", "--clipboard", "--input").start();
-            echoProcess.getInputStream().transferTo(xselProcess.getOutputStream());
-            xselProcess.waitFor();
-            logger.info("Wrote note content to clipboard using xsel");
-        }
-        return null; // Success
-    }
-
     private ResponseEntity<String> executeCreateNoteScript(String modelKey) throws IOException, InterruptedException {
-        logger.info("Executing create_note script with model: {}", modelKey);
+        logger.info("Executing create_note_from_clipboard script with model: {}", modelKey);
 
-        // Blog source path configured via application.yaml
-        String scriptPath = this.blogSourcePath;
+        String scriptPath = "/Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py";
 
-        ProcessBuilder scriptProcess =
-                new ProcessBuilder(this.pythonExecutablePath, scriptPath + "/scripts/create/create_note.py", modelKey);
-        scriptProcess.directory(new java.io.File(scriptPath));
+        ProcessBuilder scriptProcess = new ProcessBuilder(this.pythonExecutablePath, scriptPath, modelKey);
+        scriptProcess.directory(new java.io.File("/Users/lzwjava/projects/blog-source"));
 
         StringBuilder scriptOutput = new StringBuilder();
         StringBuilder scriptErrorOutput = new StringBuilder();
@@ -131,7 +82,7 @@ public class NoteController {
 
         if (scriptExitCode != 0) {
             String errorMsg = scriptErrorOutput.length() > 0 ? scriptErrorOutput.toString() : "Script execution failed";
-            logger.error("create_note script failed with exit code: {}", scriptExitCode);
+            logger.error("create_note_from_clipboard script failed with exit code: {}", scriptExitCode);
             return ResponseEntity.status(500).body("Failed to create note: " + errorMsg);
         }
 
