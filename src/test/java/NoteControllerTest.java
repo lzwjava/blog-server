@@ -1,12 +1,17 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lzwjava.Application;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -21,10 +26,31 @@ public class NoteControllerTest {
         // Use the hardcoded script path which may not exist in test environment
         // The controller will attempt to execute
         // /Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py
+        createdFilePath = null;
+    }
+
+    @AfterEach
+    void tearDownTestEnvironment() {
+        // Clean up any created test files
+        if (createdFilePath != null) {
+            try {
+                // The file paths are relative to blog-source directory
+                Path filePath = Paths.get(blogSourcePath, createdFilePath);
+                Files.deleteIfExists(filePath);
+            } catch (Exception e) {
+                // Ignore cleanup errors in tests
+            }
+            createdFilePath = null;
+        }
     }
 
     @LocalServerPort
     private int port;
+
+    @Value("${blog.source.path}")
+    private String blogSourcePath;
+
+    private String createdFilePath;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -41,6 +67,11 @@ public class NoteControllerTest {
         // Note creation should succeed with valid parameters
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Note created successfully"));
+
+        // Capture file path for cleanup
+        if (response.getBody().contains("Note created successfully")) {
+            createdFilePath = response.getBody().replace("Note created successfully: ", "");
+        }
     }
 
     @Test
@@ -91,6 +122,11 @@ public class NoteControllerTest {
         // Note creation should succeed with default model
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Note created successfully"));
+
+        // Capture file path for cleanup
+        if (response.getBody().contains("Note created successfully")) {
+            createdFilePath = response.getBody().replace("Note created successfully: ", "");
+        }
     }
 
     @Test

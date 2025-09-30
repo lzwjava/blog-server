@@ -147,7 +147,10 @@ public class NoteController {
                                     : ""));
         }
 
-        logger.info("Note created successfully");
-        return ResponseEntity.ok("Note created successfully: " + scriptOutput.toString());
+        String output = scriptOutput.toString().trim();
+        String filePath =
+                output.split("\n")[output.split("\n").length - 1]; // Get the last line which should be the file path
+        logger.info("Note created successfully at path: {}", filePath);
+        return ResponseEntity.ok("Note created successfully: " + filePath);
     }
 }
