@@ -4,7 +4,8 @@
       "Read(//Users/lzwjava/projects/lzwjava_blog/**)",
       "Bash(flutter pub get:*)",
       "Bash(mvn compile:*)",
-      "Bash(mvn clean compile checkstyle:check)"
+      "Bash(mvn clean compile checkstyle:check)",
+      "Bash(mvn test:*)"
     ],
     "deny": [],
     "ask": []
