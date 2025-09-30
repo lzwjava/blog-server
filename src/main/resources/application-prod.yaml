@@ -1,3 +1,7 @@
 blog:
   source:
     path: /path/to/prod/blog-source
+
+python:
+  executable:
+    path: /usr/bin/python3

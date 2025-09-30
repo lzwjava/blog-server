@@ -1,3 +1,7 @@
 blog:
   source:
     path: /Users/lzwjava/projects/blog-source
+
+python:
+  executable:
+    path: /opt/homebrew/bin/python3

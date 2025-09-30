@@ -21,6 +21,9 @@ public class NoteController {
     @Value("${blog.source.path}")
     private String blogSourcePath;
 
+    @Value("${python.executable.path}")
+    private String pythonExecutablePath;
+
     @CrossOrigin(origins = "*")
     @PostMapping("/create-note")
     public ResponseEntity<String> createNote(@RequestBody Map<String, String> request) {
@@ -100,7 +103,7 @@ public class NoteController {
         String scriptPath = this.blogSourcePath;
 
         ProcessBuilder scriptProcess =
-                new ProcessBuilder("python3", scriptPath + "/scripts/create/create_note.py", modelKey);
+                new ProcessBuilder(this.pythonExecutablePath, scriptPath + "/scripts/create/create_note.py", modelKey);
         scriptProcess.directory(new java.io.File(scriptPath));
 
         StringBuilder scriptOutput = new StringBuilder();
