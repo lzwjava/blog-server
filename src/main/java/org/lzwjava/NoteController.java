@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteController {
 
     private static Logger logger = LoggerFactory.getLogger(NoteController.class);
+
+    @Value("${blog.source.path}")
+    private String blogSourcePath;
 
     @CrossOrigin(origins = "*")
     @PostMapping("/create-note")
@@ -92,8 +96,8 @@ public class NoteController {
     private ResponseEntity<String> executeCreateNoteScript(String modelKey) throws IOException, InterruptedException {
         logger.info("Executing create_note script with model: {}", modelKey);
 
-        // TODO(#config): Configure blog source path via environment variable
-        String scriptPath = System.getProperty("BLOG_SOURCE_PATH", "/path/to/blog-source");
+        // Blog source path configured via application.yaml
+        String scriptPath = this.blogSourcePath;
 
         ProcessBuilder scriptProcess =
                 new ProcessBuilder("python3", scriptPath + "/create_note_from_clipboard.py", modelKey, "--only-create");
