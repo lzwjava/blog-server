@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Read(//Users/lzwjava/projects/lzwjava_blog/**)",
-      "Bash(flutter pub get:*)"
+      "Bash(flutter pub get:*)",
+      "Bash(mvn compile:*)",
+      "Bash(mvn clean compile checkstyle:check)"
     ],
     "deny": [],
     "ask": []
