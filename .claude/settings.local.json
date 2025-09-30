@@ -10,7 +10,11 @@
       "Bash(chmod:*)",
       "Bash(python:*)",
       "Bash(mvn spring-boot:run:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(unset:*)",
+      "Bash(python3:*)",
+      "Read(//Users/lzwjava/projects/blog-source/**)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

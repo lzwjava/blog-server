@@ -29,7 +29,13 @@ def call_create_note_api(content: str, model: Optional[str] = None) -> dict:
         print(f"Calling API with model: {model or 'gpt-4o'}")
         print(f"Content length: {len(content)} characters")
 
-        response = requests.post(url, json=payload)
+        # Configure proxies to bypass localhost
+        proxies = {
+            'http': None,
+            'https': None,
+        }
+
+        response = requests.post(url, json=payload, proxies=proxies)
         response.raise_for_status()  # Raise exception for bad status codes
 
         result = {
