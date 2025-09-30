@@ -6,7 +6,11 @@
       "Bash(mvn compile:*)",
       "Bash(mvn clean compile checkstyle:check)",
       "Bash(mvn test:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(chmod:*)",
+      "Bash(python:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
