@@ -92,4 +92,13 @@ public class NoteControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to create note"));
     }
+
+    @Test
+    void testGetModels() {
+        ResponseEntity<String> response =
+                restTemplate.getForEntity("http://localhost:" + port + "/models", String.class);
+
+        // Python script execution fails (path may not exist in test environment)
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
 }

@@ -3,12 +3,15 @@ package org.lzwjava;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +26,50 @@ public class NoteController {
 
     @Value("${python.executable.path}")
     private String pythonExecutablePath;
+
+    @CrossOrigin(origins = "*")
+    @GetMapping("/models")
+    public ResponseEntity<List<String>> getModels() {
+        try {
+            String scriptPath = this.blogSourcePath + "/scripts/create/get_models.py";
+
+            ProcessBuilder scriptProcess = new ProcessBuilder(this.pythonExecutablePath, scriptPath);
+            scriptProcess.directory(new java.io.File(this.blogSourcePath));
+
+            Process script = scriptProcess.start();
+            StringBuilder scriptOutput = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(script.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    scriptOutput.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exitCode = script.waitFor();
+            if (exitCode != 0) {
+                logger.error("get_models script failed with exit code: {}", exitCode);
+                return ResponseEntity.status(500).body(Arrays.asList());
+            }
+
+            String[] modelKeys = scriptOutput.toString().trim().split(",");
+            for (int i = 0; i < modelKeys.length; i++) {
+                modelKeys[i] = modelKeys[i].trim();
+            }
+
+            return ResponseEntity.ok(Arrays.asList(modelKeys));
+        } catch (IOException e) {
+            logger.error("IO error getting models", e);
+            return ResponseEntity.status(500).body(Arrays.asList());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Getting models was interrupted", e);
+            return ResponseEntity.status(500).body(Arrays.asList());
+        } catch (Exception e) {
+            logger.error("Unexpected error getting models", e);
+            return ResponseEntity.status(500).body(Arrays.asList());
+        }
+    }
 
     @CrossOrigin(origins = "*")
     @PostMapping("/create-note")
@@ -53,11 +100,11 @@ public class NoteController {
             throws IOException, InterruptedException {
         logger.info("Executing create_note_from_clipboard script with model: {}", modelKey);
 
-        String scriptPath = "/Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py";
+        String scriptPath = this.blogSourcePath + "/scripts/create/create_note_from_clipboard.py";
 
         ProcessBuilder scriptProcess = new ProcessBuilder(
                 this.pythonExecutablePath, scriptPath, "--content", noteContent, "--note-model", modelKey);
-        scriptProcess.directory(new java.io.File("/Users/lzwjava/projects/blog-source"));
+        scriptProcess.directory(new java.io.File(this.blogSourcePath));
 
         StringBuilder scriptOutput = new StringBuilder();
         StringBuilder scriptErrorOutput = new StringBuilder();
@@ -92,8 +139,12 @@ public class NoteController {
                             ? 400
                             : 500;
 
+            // Include detailed error output including traceback for debugging
             return ResponseEntity.status(statusCode)
-                    .body("Failed to create note (exit code " + scriptExitCode + "): " + errorMsg);
+                    .body("Failed to create note (exit code " + scriptExitCode + "):\n" + errorMsg
+                            + (scriptOutput.length() > 0
+                                    ? "\nScript output before error:\n" + scriptOutput.toString()
+                                    : ""));
         }
 
         logger.info("Note created successfully");
