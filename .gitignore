@@ -16,3 +16,8 @@ docker-compose.yml
 /mvnw.cmd
 __pycache__
 
+# Eclipse
+.classpath
+.project
+.settings/
+
