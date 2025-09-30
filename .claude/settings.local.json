@@ -14,7 +14,8 @@
       "Bash(unset:*)",
       "Bash(python3:*)",
       "Read(//Users/lzwjava/projects/blog-source/**)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(/opt/homebrew/bin/python3 scripts/create/get_models.py)"
     ],
     "deny": [],
     "ask": []
