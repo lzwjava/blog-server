@@ -35,7 +35,7 @@ public class NoteController {
         }
 
         try {
-            return executeCreateNoteScript(modelKey);
+            return executeCreateNoteScript(modelKey, noteContent);
         } catch (IOException e) {
             logger.error("IO error during note creation", e);
             return ResponseEntity.status(500).body("IO error during note creation: " + e.getMessage());
@@ -49,12 +49,14 @@ public class NoteController {
         }
     }
 
-    private ResponseEntity<String> executeCreateNoteScript(String modelKey) throws IOException, InterruptedException {
+    private ResponseEntity<String> executeCreateNoteScript(String modelKey, String noteContent)
+            throws IOException, InterruptedException {
         logger.info("Executing create_note_from_clipboard script with model: {}", modelKey);
 
         String scriptPath = "/Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py";
 
-        ProcessBuilder scriptProcess = new ProcessBuilder(this.pythonExecutablePath, scriptPath, modelKey);
+        ProcessBuilder scriptProcess = new ProcessBuilder(
+                this.pythonExecutablePath, scriptPath, "--content", noteContent, "--note-model", modelKey);
         scriptProcess.directory(new java.io.File("/Users/lzwjava/projects/blog-source"));
 
         StringBuilder scriptOutput = new StringBuilder();
@@ -83,7 +85,15 @@ public class NoteController {
         if (scriptExitCode != 0) {
             String errorMsg = scriptErrorOutput.length() > 0 ? scriptErrorOutput.toString() : "Script execution failed";
             logger.error("create_note_from_clipboard script failed with exit code: {}", scriptExitCode);
-            return ResponseEntity.status(500).body("Failed to create note: " + errorMsg);
+
+            // Return 400 for argument/validation errors, 500 for system errors
+            int statusCode =
+                    errorMsg.contains("error: the following arguments are required") || errorMsg.contains("usage:")
+                            ? 400
+                            : 500;
+
+            return ResponseEntity.status(statusCode)
+                    .body("Failed to create note (exit code " + scriptExitCode + "): " + errorMsg);
         }
 
         logger.info("Note created successfully");
