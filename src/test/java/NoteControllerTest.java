@@ -38,9 +38,9 @@ public class NoteControllerTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Python script execution fails (path hardcoded, may not exist in test environment)
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertTrue(response.getBody().contains("Failed to create note"));
+        // Note creation should succeed with valid parameters
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Note created successfully"));
     }
 
     @Test
@@ -88,9 +88,9 @@ public class NoteControllerTest {
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Python script execution fails (path hardcoded, may not exist in test environment)
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertTrue(response.getBody().contains("Failed to create note"));
+        // Note creation should succeed with default model
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Note created successfully"));
     }
 
     @Test
