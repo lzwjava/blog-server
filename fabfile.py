@@ -6,11 +6,12 @@ from invoke import run as local
 server_dir = "/home/project/blog-server"
 web_tmp_dir = "/home/project/blog-server/tmp"
 tmp_dir = f"/tmp/blog-server{os.getpid()}/"
+user = "ec2-user"
 
 
 def _set_user_dir(c):
     global server_dir
-    c.run("id ec2-user", warn=True)
+    c.run(f"id {user}", warn=True)
 
 
 def _prepare_local_jar():
@@ -29,7 +30,7 @@ def prepare_remote_dirs(c):
         c.sudo(f"mkdir -p {server_dir}")
     c.sudo(f"chmod -R 755 {server_dir}")
     c.sudo(f"chmod -R 777 {web_tmp_dir}")
-    c.sudo(f"chown -R ec2-user:ec2-user {server_dir}")
+    c.sudo(f"chown -R {user}:{user} {server_dir}")
 
 
 @task
@@ -55,10 +56,9 @@ def host_type(c):
 def deploy(c):
     _prepare_local_jar()
     prepare_remote_dirs(c)
-    pem_file = "./aws-keypair.pem"
     rsync_command = (
         f'rsync -avz --exclude="target/" --exclude="*.class" --exclude=".git/" '
-        f'-e "ssh -i {pem_file}" --rsync-path="sudo rsync" '
+        f'-e "ssh" --rsync-path="sudo rsync" '
         f"{tmp_dir}/ {c.user}@{c.host}:{server_dir}"
     )
     c.local(rsync_command)
