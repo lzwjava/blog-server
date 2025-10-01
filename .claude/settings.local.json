@@ -16,7 +16,8 @@
       "Read(//Users/lzwjava/projects/blog-source/**)",
       "Bash(pkill:*)",
       "Bash(/opt/homebrew/bin/python3 scripts/create/get_models.py)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Read(//Users/lzwjava/projects/**)"
     ],
     "deny": [],
     "ask": []

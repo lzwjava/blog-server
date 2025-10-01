@@ -58,7 +58,9 @@ public class NoteControllerTest {
     @Test
     void testCreateNoteWithValidRequest() {
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("content", "Test note content");
+        requestBody.put(
+                "content",
+                "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
         requestBody.put("model", "mistral-medium");
 
         ResponseEntity<String> response =
@@ -113,7 +115,9 @@ public class NoteControllerTest {
     @Test
     void testCreateNoteWithDefaultModel() {
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("content", "Test note content");
+        requestBody.put(
+                "content",
+                "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
         // No model provided, should use default
 
         ResponseEntity<String> response =
