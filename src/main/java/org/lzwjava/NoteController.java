@@ -41,13 +41,14 @@ public class NoteController {
     @PostMapping("/create-note")
     public ResponseEntity<String> createNote(@RequestBody Map<String, String> request) {
         String noteContent = request.get("content");
+        String model = request.get("model");
 
         if (noteContent == null || noteContent.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Note content is required");
         }
 
         try {
-            String title = generateTitle(noteContent);
+            String title = generateTitle(noteContent, model);
             if (title == null) {
                 return ResponseEntity.status(500).body("Failed to generate title");
             }
@@ -75,11 +76,11 @@ public class NoteController {
         }
     }
 
-    private String generateTitle(String content) {
+    private String generateTitle(String content, String model) {
         String prompt =
                 "Generate a concise and engaging title for the following content. Respond with ONLY the title:\n\n"
                         + content;
-        String title = openRouterService.callOpenRouterApi(prompt);
+        String title = openRouterService.callOpenRouterApi(prompt, model);
         if (title != null) {
             title = title.replace("*", " ").trim();
         }

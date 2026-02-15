@@ -23,18 +23,36 @@ public class OpenRouterService {
     @Value("${openrouter.api.url:https://openrouter.ai/api/v1/chat/completions}")
     private String apiUrl;
 
-    @Value("${blog.default.model:mistralai/mistral-7b-instruct:free}")
+    @Value("${blog.default.model:google/gemini-2.0-flash-exp:free}")
     private String defaultModel;
+
+    private static final Map<String, String> MODEL_NICKNAMES = Map.of(
+            "gemini-flash", "google/gemini-2.0-flash-exp:free",
+            "gemini-pro", "google/gemini-pro-1.5",
+            "kimi", "moonshotai/kimi-k2.5",
+            "deepseek", "deepseek/deepseek-v3",
+            "mistral", "mistralai/mistral-large-2411");
 
     public OpenRouterService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
 
     public String callOpenRouterApi(String prompt) {
+        return callOpenRouterApi(prompt, null);
+    }
+
+    public String callOpenRouterApi(String prompt, String modelNickname) {
         if (apiKey == null || apiKey.isEmpty()) {
             logger.error("OpenRouter API key is missing");
             return null;
         }
+
+        String modelId = defaultModel;
+        if (modelNickname != null && !modelNickname.isEmpty()) {
+            modelId = MODEL_NICKNAMES.getOrDefault(modelNickname, modelNickname);
+        }
+
+        logger.info("Calling OpenRouter with model: {}", modelId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -43,7 +61,7 @@ public class OpenRouterService {
         headers.set("X-Title", "Blog Server");
 
         Map<String, Object> requestBody =
-                Map.of("model", defaultModel, "messages", List.of(Map.of("role", "user", "content", prompt)));
+                Map.of("model", modelId, "messages", List.of(Map.of("role", "user", "content", prompt)));
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
