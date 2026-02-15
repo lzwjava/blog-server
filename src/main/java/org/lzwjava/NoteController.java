@@ -1,8 +1,13 @@
 package org.lzwjava;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class NoteController {
 
-    private static Logger logger = LoggerFactory.getLogger(NoteController.class);
+    private static final Logger logger = LoggerFactory.getLogger(NoteController.class);
 
     @Value("${blog.source.path}")
     private String blogSourcePath;
 
-    @Value("${python.executable.path}")
-    private String pythonExecutablePath;
+    private final OpenRouterService openRouterService;
+
+    public NoteController(OpenRouterService openRouterService) {
+        this.openRouterService = openRouterService;
+    }
 
     @CrossOrigin(origins = "*")
     @PostMapping("/create-note")
@@ -34,75 +42,101 @@ public class NoteController {
         }
 
         try {
-            return executeCreateNoteScript(noteContent);
-        } catch (IOException e) {
-            logger.error("IO error during note creation", e);
-            return ResponseEntity.status(500).body("IO error during note creation: " + e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Note creation was interrupted", e);
-            return ResponseEntity.status(500).body("Note creation interrupted: " + e.getMessage());
+            String title = generateTitle(noteContent);
+            if (title == null) {
+                return ResponseEntity.status(500).body("Failed to generate title");
+            }
+
+            String shortTitle = processTitleForFilename(title);
+            String notePath = createFilename(shortTitle);
+            String frontMatter = formatFrontMatter(title);
+            String cleanedContent = cleanContent(noteContent);
+
+            writeNote(notePath, frontMatter, cleanedContent);
+
+            return ResponseEntity.ok("Note created successfully: " + notePath);
         } catch (Exception e) {
-            logger.error("Unexpected error during note creation", e);
-            return ResponseEntity.status(500).body("Unexpected error: " + e.getMessage());
+            logger.error("Error creating note", e);
+            return ResponseEntity.status(500).body("Error creating note: " + e.getMessage());
         }
     }
 
-    private ResponseEntity<String> executeCreateNoteScript(String noteContent)
-            throws IOException, InterruptedException {
-        logger.info("Executing create_note_from_clipboard script");
+    private String generateTitle(String content) {
+        String prompt =
+                "Generate a concise and engaging title for the following content. Respond with ONLY the title:\n\n"
+                        + content;
+        String title = openRouterService.callOpenRouterApi(prompt);
+        if (title != null) {
+            title = title.replace("*", " ").trim();
+        }
+        return title;
+    }
 
-        String scriptPath = this.blogSourcePath + "/scripts/create/create_note_from_clipboard.py";
+    private String processTitleForFilename(String title) {
+        String processed = title.trim()
+                .replaceAll("\\s+", "-")
+                .replaceAll("[^a-zA-Z0-9-]", "")
+                .toLowerCase();
+        return processed;
+    }
 
-        ProcessBuilder scriptProcess =
-                new ProcessBuilder(this.pythonExecutablePath, scriptPath, "--content", noteContent);
-        scriptProcess.directory(new java.io.File(this.blogSourcePath));
+    private String createFilename(String shortTitle) {
+        String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String notesDir = blogSourcePath + "/notes";
+        File dir = new File(notesDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
-        StringBuilder scriptOutput = new StringBuilder();
-        StringBuilder scriptErrorOutput = new StringBuilder();
+        String baseFileName = String.format("%s-%s-en.md", dateStr, shortTitle);
+        Path path = Paths.get(notesDir, baseFileName);
 
-        Process script = scriptProcess.start();
+        int counter = 1;
+        while (Files.exists(path)) {
+            String fileNameWithCounter = String.format("%s-%s-%d-en.md", dateStr, shortTitle, counter);
+            path = Paths.get(notesDir, fileNameWithCounter);
+            counter++;
+        }
+        return path.toString();
+    }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(script.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                scriptOutput.append(line).append(System.lineSeparator());
-                logger.info("Script output: {}", line);
+    private String formatFrontMatter(String fullTitle) {
+        String title = fullTitle;
+        if (title.contains(":") && !title.startsWith("\"")) {
+            title = "\"" + title + "\"";
+        }
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return String.format(
+                """
+                ---
+                audio: false
+                generated: true
+                image: false
+                lang: en
+                layout: post
+                title: %s
+                translated: false
+                type: note
+                ---""",
+                title);
+    }
+
+    private String cleanContent(String content) {
+        String[] lines = content.split("\\r?\\n");
+        if (lines.length > 0 && lines[0].startsWith("# ")) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < lines.length; i++) {
+                sb.append(lines[i]).append(System.lineSeparator());
             }
+            return sb.toString().trim();
         }
+        return content.trim();
+    }
 
-        try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(script.getErrorStream()))) {
-            String errorLine;
-            while ((errorLine = errorReader.readLine()) != null) {
-                scriptErrorOutput.append(errorLine).append(System.lineSeparator());
-                logger.error("Script error: {}", errorLine);
-            }
-        }
-
-        int scriptExitCode = script.waitFor();
-
-        if (scriptExitCode != 0) {
-            String errorMsg = scriptErrorOutput.length() > 0 ? scriptErrorOutput.toString() : "Script execution failed";
-            logger.error("create_note_from_clipboard script failed with exit code: {}", scriptExitCode);
-
-            // Return 400 for argument/validation errors, 500 for system errors
-            int statusCode =
-                    errorMsg.contains("error: the following arguments are required") || errorMsg.contains("usage:")
-                            ? 400
-                            : 500;
-
-            // Include detailed error output including traceback for debugging
-            return ResponseEntity.status(statusCode)
-                    .body("Failed to create note (exit code " + scriptExitCode + "):\n" + errorMsg
-                            + (scriptOutput.length() > 0
-                                    ? "\nScript output before error:\n" + scriptOutput.toString()
-                                    : ""));
-        }
-
-        String output = scriptOutput.toString().trim();
-        String filePath =
-                output.split("\n")[output.split("\n").length - 1]; // Get the last line which should be the file path
-        logger.info("Note created successfully at path: {}", filePath);
-        return ResponseEntity.ok("Note created successfully: " + filePath);
+    private void writeNote(String filePath, String frontMatter, String content) throws IOException {
+        Path path = Paths.get(filePath);
+        String fullContent = frontMatter + "\n\n" + content;
+        Files.writeString(path, fullContent, StandardCharsets.UTF_8);
+        logger.info("Created note: {}", filePath);
     }
 }

@@ -1,5 +1,7 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,9 +12,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lzwjava.Application;
+import org.lzwjava.OpenRouterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
@@ -21,12 +25,13 @@ import org.springframework.http.ResponseEntity;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
 public class NoteControllerTest {
 
+    @MockBean
+    private OpenRouterService openRouterService;
+
     @BeforeEach
     void setUpTestEnvironment() {
-        // Use the hardcoded script path which may not exist in test environment
-        // The controller will attempt to execute
-        // /Users/lzwjava/projects/blog-source/scripts/create/create_note_from_clipboard.py
         createdFilePath = null;
+        when(openRouterService.callOpenRouterApi(anyString())).thenReturn("Test Title");
     }
 
     @AfterEach
@@ -34,8 +39,7 @@ public class NoteControllerTest {
         // Clean up any created test files
         if (createdFilePath != null) {
             try {
-                // The file paths are relative to blog-source directory
-                Path filePath = Paths.get(blogSourcePath, createdFilePath);
+                Path filePath = Paths.get(createdFilePath);
                 Files.deleteIfExists(filePath);
             } catch (Exception e) {
                 // Ignore cleanup errors in tests
@@ -58,18 +62,14 @@ public class NoteControllerTest {
     @Test
     void testCreateNoteWithValidRequest() {
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put(
-                "content",
-                "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
+        requestBody.put("content", "This is a test note content that is long enough.");
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Note creation should succeed with valid parameters
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Note created successfully"));
 
-        // Capture file path for cleanup
         if (response.getBody().contains("Note created successfully")) {
             createdFilePath = response.getBody().replace("Note created successfully: ", "");
         }
@@ -78,7 +78,6 @@ public class NoteControllerTest {
     @Test
     void testCreateNoteWithMissingContent() {
         Map<String, String> requestBody = new HashMap<>();
-        // No content provided
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
@@ -109,25 +108,5 @@ public class NoteControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(response.getBody().contains("Note content is required"));
-    }
-
-    @Test
-    void testCreateNoteWithDefaultModel() {
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put(
-                "content",
-                "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
-
-        ResponseEntity<String> response =
-                restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
-
-        // Note creation should succeed
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("Note created successfully"));
-
-        // Capture file path for cleanup
-        if (response.getBody().contains("Note created successfully")) {
-            createdFilePath = response.getBody().replace("Note created successfully: ", "");
-        }
     }
 }

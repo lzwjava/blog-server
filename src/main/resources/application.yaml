@@ -2,8 +2,9 @@ blog:
   source:
     path: /Users/lzwjava/projects/blog-source
   default:
-    model: mistral-medium
+    model: mistralai/mistral-7b-instruct:free
 
-python:
-  executable:
-    path: /opt/homebrew/bin/python3
+openrouter:
+  api:
+    key: ${OPENROUTER_API_KEY:}
+    url: https://openrouter.ai/api/v1/chat/completions
