@@ -28,7 +28,7 @@ public class NoteController {
     @Value("${blog.source.path}")
     private String blogSourcePath;
 
-    @Value("${github.token:${GITHUB_TOKEN:}}")
+    @Value("${github.token:${GITHUB_PAT_TOKEN:}}")
     private String githubToken;
 
     private final OpenRouterService openRouterService;
