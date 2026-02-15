@@ -61,7 +61,6 @@ public class NoteControllerTest {
         requestBody.put(
                 "content",
                 "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
-        requestBody.put("model", "mistral-medium");
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
@@ -118,12 +117,11 @@ public class NoteControllerTest {
         requestBody.put(
                 "content",
                 "This is a test note content that is longer than 100 characters to satisfy the minimum length requirement for note creation. The script requires at least 100 characters, so we use this longer test content.");
-        // No model provided, should use default
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity("http://localhost:" + port + "/create-note", requestBody, String.class);
 
-        // Note creation should succeed with default model
+        // Note creation should succeed
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Note created successfully"));
 
@@ -131,18 +129,5 @@ public class NoteControllerTest {
         if (response.getBody().contains("Note created successfully")) {
             createdFilePath = response.getBody().replace("Note created successfully: ", "");
         }
-    }
-
-    @Test
-    void testGetModels() {
-        ResponseEntity<String> response =
-                restTemplate.getForEntity("http://localhost:" + port + "/models", String.class);
-
-        // Models endpoint should return successfully with a list of available models
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody() != null && !response.getBody().isEmpty());
-        // Verify we get some expected models
-        assertTrue(
-                response.getBody().contains("claude-opus") || response.getBody().contains("gpt"));
     }
 }

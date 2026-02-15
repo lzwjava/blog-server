@@ -59,8 +59,7 @@ POST `/create-note`
 Request body:
 ```json
 {
-  "content": "Your note content here",
-  "model": "mistral-medium"  // optional, defaults to mistral-medium
+  "content": "Your note content here"
 }
 ```
 

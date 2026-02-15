@@ -3,15 +3,12 @@ package org.lzwjava;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,62 +24,17 @@ public class NoteController {
     @Value("${python.executable.path}")
     private String pythonExecutablePath;
 
-    @Value("${blog.default.model}")
-    private String defaultModel;
-
-    @CrossOrigin(origins = "*")
-    @GetMapping("/models")
-    public ResponseEntity<List<String>> getModels() {
-        try {
-            String scriptPath = this.blogSourcePath + "/scripts/create/get_models.py";
-
-            ProcessBuilder scriptProcess = new ProcessBuilder(this.pythonExecutablePath, scriptPath);
-            scriptProcess.directory(new java.io.File(this.blogSourcePath));
-
-            Process script = scriptProcess.start();
-            StringBuilder scriptOutput = new StringBuilder();
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(script.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    scriptOutput.append(line).append(System.lineSeparator());
-                }
-            }
-
-            int exitCode = script.waitFor();
-            if (exitCode != 0) {
-                logger.error("get_models script failed with exit code: {}", exitCode);
-                return ResponseEntity.status(500).body(Arrays.asList());
-            }
-
-            List<String> modelKeys =
-                    Arrays.asList(scriptOutput.toString().trim().split(","));
-            return ResponseEntity.ok(modelKeys);
-        } catch (IOException e) {
-            logger.error("IO error getting models", e);
-            return ResponseEntity.status(500).body(Arrays.asList());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Getting models was interrupted", e);
-            return ResponseEntity.status(500).body(Arrays.asList());
-        } catch (Exception e) {
-            logger.error("Unexpected error getting models", e);
-            return ResponseEntity.status(500).body(Arrays.asList());
-        }
-    }
-
     @CrossOrigin(origins = "*")
     @PostMapping("/create-note")
     public ResponseEntity<String> createNote(@RequestBody Map<String, String> request) {
         String noteContent = request.get("content");
-        String modelKey = request.getOrDefault("model", defaultModel);
 
         if (noteContent == null || noteContent.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Note content is required");
         }
 
         try {
-            return executeCreateNoteScript(modelKey, noteContent);
+            return executeCreateNoteScript(noteContent);
         } catch (IOException e) {
             logger.error("IO error during note creation", e);
             return ResponseEntity.status(500).body("IO error during note creation: " + e.getMessage());
@@ -96,14 +48,14 @@ public class NoteController {
         }
     }
 
-    private ResponseEntity<String> executeCreateNoteScript(String modelKey, String noteContent)
+    private ResponseEntity<String> executeCreateNoteScript(String noteContent)
             throws IOException, InterruptedException {
-        logger.info("Executing create_note_from_clipboard script with model: {}", modelKey);
+        logger.info("Executing create_note_from_clipboard script");
 
         String scriptPath = this.blogSourcePath + "/scripts/create/create_note_from_clipboard.py";
 
-        ProcessBuilder scriptProcess = new ProcessBuilder(
-                this.pythonExecutablePath, scriptPath, "--content", noteContent, "--note-model", modelKey);
+        ProcessBuilder scriptProcess =
+                new ProcessBuilder(this.pythonExecutablePath, scriptPath, "--content", noteContent);
         scriptProcess.directory(new java.io.File(this.blogSourcePath));
 
         StringBuilder scriptOutput = new StringBuilder();
