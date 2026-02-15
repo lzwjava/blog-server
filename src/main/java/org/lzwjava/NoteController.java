@@ -1,7 +1,9 @@
 package org.lzwjava;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +27,9 @@ public class NoteController {
 
     @Value("${blog.source.path}")
     private String blogSourcePath;
+
+    @Value("${github.token:${GITHUB_TOKEN:}}")
+    private String githubToken;
 
     private final OpenRouterService openRouterService;
 
@@ -54,7 +59,16 @@ public class NoteController {
 
             writeNote(notePath, frontMatter, cleanedContent);
 
-            return ResponseEntity.ok("Note created successfully: " + notePath);
+            // Git operations
+            try {
+                gitPush(notePath);
+            } catch (Exception gitException) {
+                logger.error("Git push failed but note was created locally", gitException);
+                return ResponseEntity.ok("Note created successfully but git push failed: " + notePath + ". Error: "
+                        + gitException.getMessage());
+            }
+
+            return ResponseEntity.ok("Note created and pushed successfully: " + notePath);
         } catch (Exception e) {
             logger.error("Error creating note", e);
             return ResponseEntity.status(500).body("Error creating note: " + e.getMessage());
@@ -138,5 +152,41 @@ public class NoteController {
         String fullContent = frontMatter + "\n\n" + content;
         Files.writeString(path, fullContent, StandardCharsets.UTF_8);
         logger.info("Created note: {}", filePath);
+    }
+
+    private void gitPush(String notePath) throws IOException, InterruptedException {
+        String fileName = new File(notePath).getName();
+
+        executeGitCommand(new String[] {"git", "add", "notes/" + fileName}, "Staged note");
+        executeGitCommand(new String[] {"git", "commit", "-m", "feat: add note " + fileName}, "Committed note");
+
+        if (githubToken != null && !githubToken.isEmpty()) {
+            String remoteUrl =
+                    String.format("https://x-access-token:%s@github.com/lzwjava/blog-source.git", githubToken);
+            executeGitCommand(new String[] {"git", "push", remoteUrl, "main"}, "Pushed to remote");
+        } else {
+            logger.warn("GitHub token not provided, skipping git push");
+            throw new IOException("GitHub token is missing");
+        }
+    }
+
+    private void executeGitCommand(String[] command, String successMessage) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.directory(new File(blogSourcePath));
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logger.info("Git output: {}", line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Git command failed with exit code " + exitCode);
+        }
+        logger.info(successMessage);
     }
 }

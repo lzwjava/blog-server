@@ -8,3 +8,6 @@ openrouter:
   api:
     key: ${OPENROUTER_API_KEY:}
     url: https://openrouter.ai/api/v1/chat/completions
+
+github:
+  token: ${GITHUB_TOKEN:}
